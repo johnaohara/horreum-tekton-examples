@@ -1,0 +1,26 @@
+scripts:
+  create-some-data:
+    - sh: date +%s%N | cut -b1-13
+    - set-state: RUN.output.start
+    - sh: sleep 3
+    - sh: date +%s%N | cut -b1-13
+    - set-state: RUN.output.stop
+    - set-state: RUN.output.value 9
+    - set-state: RUN.output.build 101
+
+  download-result:
+    - sh: echo '${{RUN.output}}' > /tmp/output.json
+    - queue-download: /tmp/output.json
+
+
+hosts:
+  localhost: LOCAL
+roles:
+  inlab:
+    hosts: 
+    - localhost
+    run-scripts:
+    - create-some-data
+    cleanup-scripts:
+    - download-result
+
