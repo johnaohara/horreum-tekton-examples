@@ -24,7 +24,7 @@ spec:
       name: run
   steps:
     - name: run-perf-test
-      image: quay.io/app-svc-perf/qDup:0.7.9
+      image: quay.io/app-svc-perf/qdup:0.7.1
       script: |
         java -version
         java -jar /opt/tools/qDup.jar \
