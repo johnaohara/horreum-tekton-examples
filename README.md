@@ -16,6 +16,12 @@
 $ kubectl create secret generic horreum-credentials  --from-file=./username --from-file=./password --from-file=./horreumUrl
 ```
 
+4. Create PVC for workspaces
+
+```shell
+$ kubectl apply  -f ./perf-test-pvc.yaml
+```
+
 ## Setup tekton tasks tasks
 
 Define tekton task;
