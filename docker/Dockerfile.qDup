@@ -9,6 +9,9 @@ RUN curl -s -L https://github.com/mikefarah/yq/releases/download/v4.23.1/yq_linu
 COPY RH-IT-Root-CA.crt /usr/local/share/ca-certificates/RH-IT-Root-CA.crt
 RUN keytool -cacerts -storepass changeit -noprompt -trustcacerts -importcert -alias ldapcert -file /usr/local/share/ca-certificates/RH-IT-Root-CA.crt
 RUN update-ca-certificates
+RUN mkdir /opt/qDup
+COPY --chown=qdup:qdup --chmod=700 qDup.sh /opt/qDup/qDup.sh
 # For some reason the script in GIT_ASKPASS fails to execute processes from `/bin`, for some reason it works through symlinks
 USER qdup
+ENTRYPOINT [ "/opt/qDup/qDup.sh" ]
 

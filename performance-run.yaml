@@ -1,65 +1,80 @@
 apiVersion: tekton.dev/v1beta1
-kind: Task
+kind: TaskRun
 metadata:
   name: performance-run
 spec:
-  params:
-  - name: credentialsSecret
-    description: the name of the Kubernetes secret that stores the credentials
-    default: horreum-credentials
-  - name: qdupUrl
-    description: the url of qDup script to run performance test
-  - name: resultFile
-    description: the file name of results to upload to horreum
-  - name: testName
-    description: Name of the test in Horreum to upload results to 
-  - name: testOwner
-    description: Owner of the test in Horreum
-    default: perf-team
-  # results:
-  #   - description: PASS/FAIL for performance tests
-  #     name: result
   workspaces:
-    - description: common workspace for output from performance run
-      name: run
-  steps:
-    - name: run-perf-test
-      image: quay.io/app-svc-perf/qdup:0.7.1
-      script: |
-        java -version
-        java -jar /opt/tools/qDup.jar \
-          -B $(workspaces.run.path) \
-          ${params.qdupUrl}
-    - name: upload-to-horreum
-      image: quay.io/app-svc-perf/horreum-cli:0.0.1-SNAPSHOT
-      env:
-        - name: HORREUM_URI
-          valueFrom:
-            secretKeyRef:
-              name: $(params.credentialsSecret)
-              key: horreumUrl
-        - name: HORREUM_USER
-          valueFrom:
-            secretKeyRef:
-              name: $(params.credentialsSecret)
-              key: username
-        - name: HORREUM_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: $(params.credentialsSecret)
-              key: password
-      args:
-      - run
-      - new
-      - --test
-      - ${params.testName}
-      - --owner
-      - ${params.testOwner}
-      - --access
-      - PRIVATE
-      - --start
-      - $.start
-      - --stop
-      - $.stop
-      - --file
-      - $(workspaces.run.path)/LOCAL/${params.resultFile}
+    - name: results
+      persistentVolumeClaim:
+        claimName: perf-tekton-workspace
+  params:
+    - name: credentialsSecret
+      value: horreum-credentials
+    - name: qdup-url
+      value: https://raw.githubusercontent.com/johnaohara/horreum-tekton-examples/main/examples/demo-pipeline.qdup.yaml
+    - name: resultFile
+      value: LOCAL/output.json
+    - name: testName
+      value: tekton-poc
+    - name: testOwner
+      value: perf-team
+  taskSpec:
+    params:
+    - name: credentialsSecret
+      description: the name of the Kubernetes secret that stores the credentials
+    - name: qdup-url
+      description: the url of qDup script to run performance test
+    - name: resultFile
+      description: the file name of results to upload to horreum
+    - name: testName
+      description: Name of the test in Horreum to upload results to 
+    - name: testOwner
+      description: Owner of the test in Horreum
+      default: perf-team
+    steps:
+      - name: run-perf-test
+        image: quay.io/app-svc-perf/qdup:0.7.1
+        args:
+            - $(workspaces.results.path)
+            - $(params.qdup-url)
+      - name: show-results
+        image: ubuntu
+        script: |
+          #!/bin/bash
+          ls -la $(workspaces.results.path)
+          cat $(workspaces.results.path)/$(params.resultFile)              
+      - name: upload-to-horreum
+        image: quay.io/app-svc-perf/horreum-cli:0.0.1-SNAPSHOT
+        env:
+          - name: HORREUM_URI
+            valueFrom:
+              secretKeyRef:
+                name: $(params.credentialsSecret)
+                key: horreumUrl
+          - name: HORREUM_USER
+            valueFrom:
+              secretKeyRef:
+                name: $(params.credentialsSecret)
+                key: username
+          - name: HORREUM_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: $(params.credentialsSecret)
+                key: password
+        args:
+        - run
+        - new
+        - --test
+        - $(params.testName)
+        - --owner
+        - $(params.testOwner)
+        - --access
+        - PRIVATE
+        - --start
+        - $.start
+        - --stop
+        - $.stop
+        - --file
+        - $(workspaces.results.path)/$(params.resultFile)
+    workspaces:
+    - name: results

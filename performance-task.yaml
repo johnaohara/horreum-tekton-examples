@@ -1,0 +1,57 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: performance-task
+spec:
+  params:
+  - name: credentialsSecret
+    description: the name of the Kubernetes secret that stores the credentials
+    default: horreum-credentials
+  - name: qdupUrl
+    description: the url of qDup script to run performance test
+  - name: resultFile
+    description: the file name of results to upload to horreum
+  - name: testName
+    description: Name of the test in Horreum to upload results to 
+  - name: testOwner
+    description: Owner of the test in Horreum
+    default: perf-team
+  steps:
+    - name: run-perf-test
+      image: quay.io/app-svc-perf/qdup:0.7.1
+      script: /opt/qDup/qDup.sh $(workspaces.results.path) ${params.qdupUrl}
+    - name: upload-to-horreum
+      image: quay.io/app-svc-perf/horreum-cli:0.0.1-SNAPSHOT
+      env:
+        - name: HORREUM_URI
+          valueFrom:
+            secretKeyRef:
+              name: $(params.credentialsSecret)
+              key: horreumUrl
+        - name: HORREUM_USER
+          valueFrom:
+            secretKeyRef:
+              name: $(params.credentialsSecret)
+              key: username
+        - name: HORREUM_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: $(params.credentialsSecret)
+              key: password
+      args:
+      - run
+      - new
+      - --test
+      - ${params.testName}
+      - --owner
+      - ${params.testOwner}
+      - --access
+      - PRIVATE
+      - --start
+      - $.start
+      - --stop
+      - $.stop
+      - --file
+      - $(workspaces.results.path)/LOCAL/${params.resultFile}
+  workspaces:
+  - name: results
