@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: performance-test-run
+spec:
+  params:
+  - name: qdup-url
+    description: remote URL of qDup run
+  steps:
+    - name: run-perf-test
+      image: quay.io/app-svc-perf/qdup:0.7.1
+      args:
+          - $(workspaces.results.path)
+          - $(params.qdup-url)
+  workspaces:
+  - name: results          

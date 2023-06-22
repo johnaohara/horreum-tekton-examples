@@ -1,0 +1,50 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: performance-test-horreum-upload
+spec:
+  params:
+  - name: credentialsSecret
+    description: Name of the Kubernetes secret containing Horreum credentials
+  - name: resultFile
+    description: the file name of results to upload to horreum
+  - name: testName
+    description: Name of the test in Horreum to upload results to 
+  - name: testOwner
+    description: Owner of the test in Horreum
+  steps:
+    - name: upload-to-horreum
+      image: quay.io/app-svc-perf/horreum-cli:0.0.1-SNAPSHOT
+      env:
+        - name: HORREUM_URI
+          valueFrom:
+            secretKeyRef:
+              name: $(params.credentialsSecret)
+              key: horreumUrl
+        - name: HORREUM_USER
+          valueFrom:
+            secretKeyRef:
+              name: $(params.credentialsSecret)
+              key: username
+        - name: HORREUM_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: $(params.credentialsSecret)
+              key: password
+      args:
+      - run
+      - new
+      - --test
+      - $(params.testName)
+      - --owner
+      - $(params.testOwner)
+      - --access
+      - PRIVATE
+      - --start
+      - $.start
+      - --stop
+      - $.stop
+      - --file
+      - $(workspaces.results.path)/$(params.resultFile)
+  workspaces:
+  - name: results          

@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: performance-test-show-results
+spec:
+  params:
+  - name: resultFile
+    description: the file path of results to display
+  steps:
+    - name: show-results
+      image: ubuntu
+      script: |
+        #!/bin/bash
+        ls -la $(workspaces.results.path)
+        cat $(workspaces.results.path)/$(params.resultFile)              
+  workspaces:
+  - name: results          

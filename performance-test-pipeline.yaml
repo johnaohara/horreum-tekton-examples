@@ -1,0 +1,55 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: performance-test-pipeline
+spec:
+  workspaces:
+    - name: results
+  params:
+  - name: credentialsSecret
+    description: the name of the Kubernetes secret that stores the credentials
+  - name: qdup-url
+    description: the url of qDup script to run performance test
+  - name: resultFile
+    description: the file name of results to upload to horreum
+  - name: testName
+    description: Name of the test in Horreum to upload results to 
+  - name: testOwner
+    description: Owner of the test in Horreum
+    default: perf-team
+  tasks:
+    - name: performance-test-run
+      taskRef:
+        name: performance-test-run
+      params:
+        - name: qdup-url
+          value: "$(params.qdup-url)"
+      workspaces:
+        - name: results
+    - name: performance-test-show-results
+      taskRef:
+        name: performance-test-show-results
+      params:
+        - name: resultFile
+          value: "$(params.resultFile)"
+      workspaces:
+        - name: results
+      runAfter:
+        - performance-test-run
+    - name: performance-test-horreum-upload
+      taskRef:
+        name: performance-test-horreum-upload
+      params:
+        - name: credentialsSecret
+          value: "$(params.credentialsSecret)"
+        - name: resultFile
+          value: "$(params.resultFile)"
+        - name: testName
+          value: "$(params.testName)"
+        - name: testOwner
+          value: "$(params.testOwner)"
+      workspaces:
+        - name: results
+      runAfter:
+        - performance-test-show-results
+        
