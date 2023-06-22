@@ -116,4 +116,34 @@ $ tkn taskrun logs horreum-run-payload-run-9kp4h -f -n default
 
 ## Example Pipeline
 
-TODO:: Define example pipeline
+Define tekton pipeline and tasks;
+
+```shell
+$ kubectl apply -f ./performance-test-run.yaml 
+$ kubectl apply -f ./performance-test-show-results.yaml 
+$ kubectl apply -f ./performance-test-horreum-upload.yaml 
+$ kubectl apply -f ./performance-test-pipeline.yaml 
+```
+
+Start a predefined pipeline run;
+
+```shell
+$ kubectl apply -f ./performance-test-pipeline-run.yaml 
+```
+
+Start an interactive pipeline run;
+
+```shell
+$  tkn p start performance-test-pipeline
+? Value for param `credentialsSecret` of type `string`? horreum-credentials
+? Value for param `qdup-url` of type `string`? https://raw.githubusercontent.com/johnaohara/horreum-tekton-examples/main/examples/demo-pipeline.qdup.yaml
+? Value for param `resultFile` of type `string`? LOCAL/output.json
+? Value for param `testName` of type `string`? tekton-poc
+? Value for param `testOwner` of type `string`? (Default is `perf-team`) perf-team
+Please give specifications for the workspace: results 
+? Name for the workspace : results
+? Value of the Sub Path :  
+? Type of the Workspace : pvc
+? Value of Claim Name : perf-tekton-workspace
+PipelineRun started: performance-test-pipeline-run-z5t4z
+```
