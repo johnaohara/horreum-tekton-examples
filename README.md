@@ -22,6 +22,13 @@ $ kubectl create secret generic horreum-credentials  --from-file=./username --fr
 $ kubectl apply  -f ./perf-test-pvc.yaml
 ```
 
+5. Optional: Install tekton dashboard
+
+```shell
+$ kubectl apply --filename https://storage.googleapis.com/tekton-releases/dashboard/latest/release.yaml
+$ kubectl port-forward -n tekton-pipelines service/tekton-dashboard 9097:9097
+```
+
 ## Setup tekton tasks tasks
 
 Define tekton task;
