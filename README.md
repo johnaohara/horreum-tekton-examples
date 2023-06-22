@@ -147,3 +147,49 @@ Please give specifications for the workspace: results
 ? Value of Claim Name : perf-tekton-workspace
 PipelineRun started: performance-test-pipeline-run-z5t4z
 ```
+
+View Pipeline run log;
+
+```shell
+$ tkn pr logs performance-test-pipeline-run-z5t4z
+[performance-test-run : run-perf-test] 16:55:50.878 running with detached console
+[performance-test-run : run-perf-test] 16:55:50.884 Running qDup version 0.7.1 @ 1fc7ef9
+[performance-test-run : run-perf-test] 16:55:50.884 output path = /workspace/results
+[performance-test-run : run-perf-test] 16:55:50.884 shell exit code checks enabled
+[performance-test-run : run-perf-test] 16:55:51.002 json server listening at performance-test-pipeline-run-z5t4z-performance-test-run-pod:31337
+[performance-test-run : run-perf-test] 16:55:51.158 starting 1 scripts
+[performance-test-run : run-perf-test] 16:55:51.161 create-some-data:38@LOCAL: script-cmd: create-some-data
+[performance-test-run : run-perf-test] 16:55:51.162 create-some-data:38@LOCAL: create-some-data
+[performance-test-run : run-perf-test] 16:55:51.570 create-some-data:38@LOCAL: date +%s%N | cut -b1-13
+[performance-test-run : run-perf-test] 1687452951165
+[performance-test-run : run-perf-test] 16:55:51.573 create-some-data:38@LOCAL: set-state: RUN.output.start 1687452951165
+[performance-test-run : run-perf-test] 16:55:54.979 create-some-data:38@LOCAL: sleep 3
+[performance-test-run : run-perf-test] 16:55:55.385 create-some-data:38@LOCAL: date +%s%N | cut -b1-13
+[performance-test-run : run-perf-test] 1687452954981
+[performance-test-run : run-perf-test] 16:55:55.387 create-some-data:38@LOCAL: set-state: RUN.output.stop 1687452954981
+[performance-test-run : run-perf-test] 16:55:55.389 create-some-data:38@LOCAL: set-state: RUN.output.value 9
+[performance-test-run : run-perf-test] 16:55:55.390 create-some-data:38@LOCAL: set-state: RUN.output.build 101
+[performance-test-run : run-perf-test] 16:55:55.395 create-some-data:16@LOCAL. reader thread is stopping
+[performance-test-run : run-perf-test] 16:55:55.500 starting 1 scripts
+[performance-test-run : run-perf-test] 16:55:55.501 inlab-cleanup:50@LOCAL: inlab-cleanup
+[performance-test-run : run-perf-test] 16:55:55.502 inlab-cleanup:50@LOCAL: script-cmd: download-result
+[performance-test-run : run-perf-test] 16:55:55.502 inlab-cleanup:50@LOCAL: download-result
+[performance-test-run : run-perf-test] 16:55:55.913 inlab-cleanup:50@LOCAL: echo '{"start":1687452951165,"stop":1687452954981,"value":9,"build":101}' > /tmp/output.json
+[performance-test-run : run-perf-test] 16:55:55.915 inlab-cleanup:50@LOCAL: queue-download: /tmp/output.json=/tmp/output.json /workspace/results/LOCAL/
+[performance-test-run : run-perf-test] 16:55:55.918 inlab-cleanup@LOCAL. reader thread is stopping
+[performance-test-run : run-perf-test] 16:55:55.918 run-1687452950040 downloading queued downloads
+[performance-test-run : run-perf-test] 16:55:55.920 Local.download(LOCAL:/tmp/output.json,/workspace/results/LOCAL/)
+[performance-test-run : run-perf-test] Finished in 04.897 at /workspace/results
+
+[performance-test-show-results : show-results] total 16
+[performance-test-show-results : show-results] drwxrwxrwx. 1 root root    40 Jun 22 11:25 .
+[performance-test-show-results : show-results] drwxrwxrwx. 1 root root    14 Jun 22 16:56 ..
+[performance-test-show-results : show-results] drwxr-xr-x. 1 1000 1000    22 Jun 22 11:25 LOCAL
+[performance-test-show-results : show-results] -rw-r--r--. 1 1000 1000 11091 Jun 22 16:55 run.json
+[performance-test-show-results : show-results] -rw-r--r--. 1 1000 1000  1324 Jun 22 16:55 run.log
+[performance-test-show-results : show-results] {"start":1687452951165,"stop":1687452954981,"value":9,"build":101}
+
+[performance-test-horreum-upload : upload-to-horreum] Starting the Java application using /opt/jboss/container/java/run/run-java.sh run new --test tekton-poc --owner perf-team --access PRIVATE --start $.start --stop $.stop --file /workspace/results/LOCAL/output.json...
+[performance-test-horreum-upload : upload-to-horreum] INFO exec  java -Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -XX:MaxRAMPercentage=50.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+ExitOnOutOfMemoryError -cp "." -jar /deployments/quarkus-run.jar run new --test tekton-poc --owner perf-team --access PRIVATE --start $.start --stop $.stop --file /workspace/results/LOCAL/output.json
+[performance-test-horreum-upload : upload-to-horreum] new run uploaded: https://example.com/run/17986#run
+```
