@@ -11,7 +11,8 @@ spec:
       image: ubuntu
       script: |
         #!/bin/bash
-        ls -la $(workspaces.results.path)
-        cat $(workspaces.results.path)/$(params.resultFile)              
+        echo "Content of: $(workspaces.results.path)/$(params.resultFile)"
+        echo ""
+        cat $(workspaces.results.path)/$(params.resultFile)
   workspaces:
   - name: results          

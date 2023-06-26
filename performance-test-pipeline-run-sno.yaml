@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: performance-test-pipeline-run-sno
+spec:
+spec:
+  pipelineRef:
+    name: performance-test-pipeline
+  params:
+    - name: credentialsSecret
+      value: horreum-credentials-sno
+    - name: qdup-url
+      value: https://raw.githubusercontent.com/johnaohara/horreum-tekton-examples/main/examples/demo-pipeline.qdup.yaml
+    - name: resultFile
+      value: LOCAL/output.json
+    - name: testName
+      value: tekton-poc
+    - name: testOwner
+      value: test-team
+  workspaces:
+    - name: results
+      persistentVolumeClaim:
+        claimName: perf-tekton-workspace
