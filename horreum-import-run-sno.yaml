@@ -1,0 +1,69 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: horreum-import-run-sno
+spec:
+spec:
+  taskRef:
+    name: horreum-import
+  params:
+    - name: credentialsSecret
+      value: horreum-credentials-sno
+    - name: spec
+      value: |
+        type: Test
+        spec:
+          name: simple
+          description: 'Simple test definition'
+          owner: test-team
+          access: 0
+          timelineLabels:
+          - timestamp
+          timelineFunction: timestamp => timestamp
+          notificationsEnabled: false
+          alerting:
+            variables:
+            - name: importantKPI
+              group:
+              order: 0
+              labels:
+              - Plaintext
+              changeDetection:
+              - model: relativeDifference
+                config:
+                  filter: mean
+                  window: 1
+                  threshold: 0.2
+                  minPrevious: 5
+              - model: relativeDifference
+                config:
+                  filter: mean
+                  window: 5
+                  threshold: 0.1
+                  minPrevious: 5
+            missingDataRules: []
+          actions: []
+          experiments:
+          - name: Simple Experiment
+            selectorLabels:
+            - Framework
+            selectorFilter: value => value === 'Something'
+            baselineLabels:
+            - timestamp
+            baselineFilter: value => value === 1666955225547
+            comparisons:
+            - model: relativeDifference
+              config:
+                threshold: 0.1
+                greaterBetter: true
+                maxBaselineDatasets: 0
+              variable: importantKPI
+            extraLabels:
+          subscriptions:
+            users: []
+            optout: []
+            teams: []
+  workspaces:
+    - name: shared
+      persistentVolumeClaim:
+        claimName: perf-tekton-workspace

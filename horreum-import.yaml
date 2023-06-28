@@ -1,13 +1,21 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: horreum-test-list
+  name: horreum-import
 spec:
   params:
-    - name: credentialsSecret
-      description: the name of the Kubernetes secret that stores the credentials
-      default: horreum-credentials
+  - name: credentialsSecret
+    description: the name of the Kubernetes secret that stores the credentials
+    default: horreum-credentials
+  - name: spec
+    type: string
   steps:
+    - name: write-spec-to-file
+      image: alpine
+      script: |
+        #!/bin/sh
+        echo "$(params.spec)" > $(workspaces.shared.path)/import.yaml
+        cat $(workspaces.shared.path)/import.yaml
     - name: upload
       image: quay.io/app-svc-perf/horreum-cli:0.0.1-SNAPSHOT
       env:
@@ -27,5 +35,8 @@ spec:
               name: $(params.credentialsSecret)
               key: password
       args:
-      - test
-      - list
+      - import
+      - --file
+      - $(workspaces.shared.path)/import.yaml
+  workspaces:
+  - name: shared
